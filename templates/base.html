@@ -14,10 +14,9 @@
     <title>{{ title }}</title>
 </head>
 <body>
-    <h1>Миссия Колонизация Марса</h1>
-    <h4>И на Марсе будут яблони цвести!</h4>
+    <h1>Travel Notes</h1>
     <nav class="navbar navbar-light bg-light">
-        <a class="navbar-brand" href="/">Наше приложение</a>
+        <a class="navbar-brand" href="/">Заметки путешественников</a>
         {% if current_user.is_authenticated %}
     <a class="navbar-brand" href="/">{{ current_user.name }}</a>
 {% else %}
