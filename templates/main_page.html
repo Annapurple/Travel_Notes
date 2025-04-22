@@ -2,5 +2,35 @@
 
 {% block content %}
 <h1>Notes</h1>
-
+{% if current_user.is_authenticated%}
+    <div>
+        <a href="/note" class="btn btn-primary">
+            Добавить заметку
+        </a>
+    </div>
+{% endif %}
+{% for i in notes%}
+<div class="col-md6 border rounded">
+    <h2>{{i.title}}</h2>
+    <div>
+        {{i.location}}
+    </div>
+    <div>
+        {{i.information}}
+    </div>
+    <div>
+        Автор - {{i.user.name}}, Дата написания - {{i.date}}
+    </div>
+    {% if current_user.is_authenticated and current_user == i.user %}
+    <div>
+        <a href="/notes/{{ i.id }}" class="btn btn-warning">
+            Изменить
+        </a>
+        <a href="/notes_delete/{{ i.id }}" class="btn btn-danger">
+            Удалить
+        </a>
+    </div>
+</div>
+{% endif %}
+{% endfor %}
 {% endblock %}

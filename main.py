@@ -73,22 +73,72 @@ def login():
 
 @app.route('/note', methods=['GET', 'POST'])
 @login_required
-def add_job():
+def add_note():
     form = NotesForm()
     if form.validate_on_submit():
         db_sess = db_session.create_session()
-        job = Notes(
+        note = Notes(
+            title=form.title.data,
             location=form.location.data,
             information=form.information.data,
-            work_size=form.work.data,
+            date=datetime.now(),
             is_anon=form.is_anon.data)
-        if job:
-            current_user.job.append(job)
-            db_sess.merge(job)
+        if note:
+            current_user.notes.append(note)
+            db_sess.merge(note)
             db_sess.commit()
         return redirect('/')
-    return render_template('notes_form.html', title='Добавление работы',
-                           form=form)
+    return render_template('notes_form.html', title='Добавление заметки', form=form)
+
+
+@app.route('/notes/<int:id>', methods=['GET', 'POST'])
+@login_required
+def edit_note(id):
+    form = NotesForm()
+    if request.method == "GET":
+        db_sess = db_session.create_session()
+        notes = db_sess.query(Notes).filter(Notes.id == id,
+                                            Notes.user == current_user
+                                            ).first()
+        if notes:
+            form.title.data = notes.title
+            form.location.data = notes.location
+            form.information.data = notes.information
+        else:
+            abort(404)
+    if form.validate_on_submit():
+        db_sess = db_session.create_session()
+        notes = db_sess.query(Notes).filter(Notes.id == id,
+                                            Notes.user == current_user
+                                            ).first()
+        if notes:
+            notes.title = form.title.data
+            notes.location = form.location.data
+            notes.information = form.information.data
+            notes.is_anon = form.is_anon.data
+            db_sess.commit()
+            return redirect('/')
+        else:
+            abort(404)
+    return render_template('notes_form.html',
+                           title='Редактирование новости',
+                           form=form
+                           )
+
+
+@app.route('/notes_delete/<int:id>', methods=['GET', 'POST'])
+@login_required
+def note_delete(id):
+    db_sess = db_session.create_session()
+    notes = db_sess.query(Notes).filter(Notes.id == id,
+                                        Notes.user == current_user
+                                        ).first()
+    if notes:
+        db_sess.delete(notes)
+        db_sess.commit()
+    else:
+        abort(404)
+    return redirect('/')
 
 
 @app.route('/logout')

@@ -13,6 +13,7 @@ class Notes(SqlAlchemyBase, SerializerMixin):
                            primary_key=True, autoincrement=True)
     user_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey("users.id"), nullable=True)
     bit_picture = sqlalchemy.Column(sqlalchemy.String, nullable=True)
+    title = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     location = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     information = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     date = sqlalchemy.Column(sqlalchemy.DateTime, nullable=True)

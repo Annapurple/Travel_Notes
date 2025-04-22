@@ -6,6 +6,7 @@ from wtforms.validators import DataRequired
 
 
 class NotesForm(FlaskForm):
+    title = StringField('Name of place', validators=[DataRequired()])
     location = StringField('Location', validators=[DataRequired()])
     information = StringField('Informaton', validators=[DataRequired()])
     is_anon = BooleanField("Anonymously?")

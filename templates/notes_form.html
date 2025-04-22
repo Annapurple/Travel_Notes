@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Добавление заметки</h1>
+<form action="" method="post">
+    {{ form.hidden_tag() }}
+    <p>
+        {{ form.title.label }}<br>
+        {{ form.title(class="form-control") }}<br>
+        {% for error in form.title.errors %}
+            <p class="alert alert-danger" role="alert">
+                {{ error }}
+            </p>
+        {% endfor %}
+    </p>
+    <p>
+        {{ form.location.label }}<br>
+        {{ form.location(class="form-control") }}<br>
+        {% for error in form.location.errors %}
+            <p content="alert alert-danger" role="alert">
+                {{ error }}
+            </p>
+        {% endfor %}
+    </p>
+    <p>
+        {{ form.information.label }}<br>
+        {{ form.information(class="form-control") }}<br>
+        {% for error in form.information.errors %}
+            <p content="alert alert-danger" role="alert">
+                {{ error }}
+            </p>
+        {% endfor %}
+    </p>
+    <p>{{ form.is_anon() }} {{ form.is_anon.label }}</p>
+    <p>{{ form.submit(type="submit") }}</p>
+    {{message}}
+</form>
+{% endblock %}
