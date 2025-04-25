@@ -4,7 +4,7 @@ from enum import member
 from forms.registration_form import RegisterForm
 from forms.login_form import LoginForm
 from forms.notes_form import NotesForm
-from flask import Flask, render_template, redirect, abort, request
+from flask import Flask, render_template, redirect, abort, request, url_for
 from flask_login import login_user, LoginManager, logout_user, login_required, current_user
 from data import db_session
 from data.notes import Notes
@@ -29,6 +29,14 @@ def text():
     db_sess = db_session.create_session()
     note = db_sess.query(Notes).filter(Notes.user)
     return render_template("main_page.html", notes=note, title='Notes')
+
+
+@app.route('/user_page')
+@login_required
+def user_page():
+    db_sess = db_session.create_session()
+    note = db_sess.query(Notes).filter(Notes.user)
+    return render_template("user_page.html", notes=note, title='Notes')
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -124,6 +132,17 @@ def edit_note(id):
                            title='Редактирование новости',
                            form=form
                            )
+
+
+# @app.route('/load_photo/<int:id>', methods=['POST', 'GET'])
+# def sample_file_upload(id):
+#     if request.method == 'GET':
+#         return render_template('photo.html')
+#     elif request.method == 'POST':
+#         f = request.files['file']
+#         with open("./static/images/file.png", "wb") as file:
+#             file.write(f.read())
+#         return redirect(url_for('sample_file_upload'), 301)
 
 
 @app.route('/notes_delete/<int:id>', methods=['GET', 'POST'])
