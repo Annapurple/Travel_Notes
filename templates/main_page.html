@@ -18,9 +18,14 @@
     <div>
         {{i.information}}
     </div>
+    {% if i.is_anon == False %}
     <div>
-        Автор - {{i.user.name}}, Дата написания - {{i.date}}
+        Автор - {{i.user.name}}
     </div>
+    {% elif i.is_anon == True %}
+    <div>Автор неизвестен</div>
+    {% endif %}
+    <div>Дата написания - {{i.date}}</div>
     {% if current_user.is_authenticated and current_user == i.user %}
     <div>
         <a href="/notes/{{ i.id }}" class="btn btn-warning">
@@ -29,6 +34,11 @@
         <a href="/notes_delete/{{ i.id }}" class="btn btn-danger">
             Удалить
         </a>
+        {% if not i.bit_picture %}
+        <a href="/load_photo/{{ i.id }}" class="btn btn-warning">
+            Добавить фото
+        </a>
+        {% endif %}
     </div>
 </div>
 {% endif %}

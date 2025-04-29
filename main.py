@@ -1,4 +1,5 @@
 import secrets
+import requests
 from datetime import datetime
 from enum import member
 from forms.registration_form import RegisterForm
@@ -16,6 +17,9 @@ db_session.global_init("db/travelers.db")
 
 login_manager = LoginManager()
 login_manager.init_app(app)
+
+server_address = 'http://geocode-maps.yandex.ru/1.x/?'
+api_key = 'e04cf839-b4c5-4535-914d-773071ef4cfa'
 
 
 @login_manager.user_loader
@@ -85,6 +89,17 @@ def add_note():
     form = NotesForm()
     if form.validate_on_submit():
         db_sess = db_session.create_session()
+        # place = form.location.data
+        # geocoder_request = requests.get(f'{server_address}apikey={api_key}&geocode={place}&format=json')
+        # response = requests.get(geocoder_request)
+        # if response:
+        #     json_response = response.json()
+        #     toponym = json_response["response"]["GeoObjectCollection"]["featureMember"][0]["GeoObject"]
+        #     toponym_address = toponym["metaDataProperty"]["GeocoderMetaData"]["text"]
+        #     toponym_coodrinates = toponym["Point"]["pos"]
+        #     location = f'{toponym_address} имеет координаты:{toponym_coodrinates}'
+        # else:
+        #     location = place
         note = Notes(
             title=form.title.data,
             location=form.location.data,
@@ -134,15 +149,15 @@ def edit_note(id):
                            )
 
 
-# @app.route('/load_photo/<int:id>', methods=['POST', 'GET'])
-# def sample_file_upload(id):
-#     if request.method == 'GET':
-#         return render_template('photo.html')
-#     elif request.method == 'POST':
-#         f = request.files['file']
-#         with open("./static/images/file.png", "wb") as file:
-#             file.write(f.read())
-#         return redirect(url_for('sample_file_upload'), 301)
+@app.route('/load_photo/<int:id>', methods=['POST', 'GET'])
+def sample_file_upload(id):
+    if request.method == 'GET':
+        return render_template('photo.html')
+    elif request.method == 'POST':
+        f = request.files['file']
+        with open("./static/images/file.png", "wb") as file:
+            file.write(f.read())
+        return redirect(url_for('sample_file_upload'), 301)
 
 
 @app.route('/notes_delete/<int:id>', methods=['GET', 'POST'])

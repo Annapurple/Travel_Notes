@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
-<h1>Ваша страница</h1>
+<h1>Мои записи</h1>
 {% for i in notes%}
 {% if current_user.is_authenticated and current_user == i.user %}
 <div class="col-md6 border rounded">
