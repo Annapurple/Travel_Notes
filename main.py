@@ -18,9 +18,6 @@ db_session.global_init("db/travelers.db")
 login_manager = LoginManager()
 login_manager.init_app(app)
 
-server_address = 'http://geocode-maps.yandex.ru/1.x/?'
-api_key = 'e04cf839-b4c5-4535-914d-773071ef4cfa'
-
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -88,21 +85,23 @@ def login():
 def add_note():
     form = NotesForm()
     if form.validate_on_submit():
+        server_address = 'http://geocode-maps.yandex.ru/1.x/?'
+        api_key = '8013b162-6b42-4997-9691-77b7074026e0'
         db_sess = db_session.create_session()
-        # place = form.location.data
-        # geocoder_request = requests.get(f'{server_address}apikey={api_key}&geocode={place}&format=json')
-        # response = requests.get(geocoder_request)
-        # if response:
-        #     json_response = response.json()
-        #     toponym = json_response["response"]["GeoObjectCollection"]["featureMember"][0]["GeoObject"]
-        #     toponym_address = toponym["metaDataProperty"]["GeocoderMetaData"]["text"]
-        #     toponym_coodrinates = toponym["Point"]["pos"]
-        #     location = f'{toponym_address} имеет координаты:{toponym_coodrinates}'
-        # else:
-        #     location = place
+        place = form.location.data
+        geocoder_request = f'{server_address}apikey={api_key}&geocode={place}&format=json'
+        response = requests.get(geocoder_request)
+        if response:
+            json_response = response.json()
+            toponym = json_response["response"]["GeoObjectCollection"]["featureMember"][0]["GeoObject"]
+            toponym_address = toponym["metaDataProperty"]["GeocoderMetaData"]["text"]
+            toponym_coodrinates = toponym["Point"]["pos"]
+            location = f'{place} имеет координаты:{toponym_coodrinates}'
+        else:
+            location = place
         note = Notes(
             title=form.title.data,
-            location=form.location.data,
+            location=location,
             information=form.information.data,
             date=datetime.now(),
             is_anon=form.is_anon.data)
@@ -112,7 +111,6 @@ def add_note():
             db_sess.commit()
         return redirect('/')
     return render_template('notes_form.html', title='Добавление заметки', form=form)
-
 
 @app.route('/notes/<int:id>', methods=['GET', 'POST'])
 @login_required
@@ -151,13 +149,20 @@ def edit_note(id):
 
 @app.route('/load_photo/<int:id>', methods=['POST', 'GET'])
 def sample_file_upload(id):
+    db_sess = db_session.create_session()
     if request.method == 'GET':
         return render_template('photo.html')
     elif request.method == 'POST':
         f = request.files['file']
-        with open("./static/images/file.png", "wb") as file:
+        with open("./static/images/file.txt", "wb") as file:
+            #print(file)
             file.write(f.read())
-        return redirect(url_for('sample_file_upload'), 301)
+            # note = Notes(bit_picture=file)
+            # if note:
+            #     current_user.notes.append(note)
+            #     db_sess.merge(note)
+            #     db_sess.commit()
+        return redirect('/', 301)
 
 
 @app.route('/notes_delete/<int:id>', methods=['GET', 'POST'])
