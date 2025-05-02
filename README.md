@@ -1,4 +1,4 @@
-![image](https://github.com/user-attachments/assets/a350dafd-025f-4b98-850e-03ad2acb2b28)# Travel_Notes
+# Travel_Notes
 Travel_Notes – сайт, в котором можно увидеть ленту заметок путешественников. Можно будет просмотреть записи других пользователей, а также добавить свою запись. 
 
 
