@@ -85,22 +85,25 @@ def add_note():
     form = NotesForm()
     if form.validate_on_submit():
         db_sess = db_session.create_session()
-        # server_address = 'http://geocode-maps.yandex.ru/1.x/?'
-        # api_key = '8013b162-6b42-4997-9691-77b7074026e0'
-        # place = form.location.data
-        # geocoder_request = f'{server_address}apikey={api_key}&geocode={place}&format=json'
-        # response = requests.get(geocoder_request)
-        # if response:
-        #     json_response = response.json()
-        #     toponym = json_response["response"]["GeoObjectCollection"]["featureMember"][0]["GeoObject"]
-        #     toponym_address = toponym["metaDataProperty"]["GeocoderMetaData"]["text"]
-        #     toponym_coodrinates = toponym["Point"]["pos"]
-        #     location = f'{place} имеет координаты:{toponym_coodrinates}'
-        # else:
-        #     location = place
+        server_address = 'http://geocode-maps.yandex.ru/1.x/?'
+        api_key = '8013b162-6b42-4997-9691-77b7074026e0'
+        place = form.location.data
+        geocoder_request = f'{server_address}apikey={api_key}&geocode={place}&format=json'
+        response = requests.get(geocoder_request)
+        if response:
+            try:
+                json_response = response.json()
+                toponym = json_response["response"]["GeoObjectCollection"]["featureMember"][0]["GeoObject"]
+                toponym_address = toponym["metaDataProperty"]["GeocoderMetaData"]["text"]
+                toponym_coodrinates = toponym["Point"]["pos"]
+                location = f'{place} имеет координаты:{toponym_coodrinates}'
+            except:
+                location = place
+        else:
+            location = place
         note = Notes(
             title=form.title.data,
-            location=form.location.data,
+            location=location,
             information=form.information.data,
             image=form.image.data.read(),
             image_name=form.image.data.filename,
