@@ -141,6 +141,8 @@ def edit_note(id):
             notes.title = form.title.data
             notes.location = form.location.data
             notes.information = form.information.data
+            notes.image = form.image.data.read()
+            notes.image_name = form.image.data.filename
             notes.is_anon = form.is_anon.data
             db_sess.commit()
             return redirect('/')
