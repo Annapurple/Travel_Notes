@@ -25,6 +25,7 @@
     {% elif i.is_anon == True %}
     <div>Автор неизвестен</div>
     {% endif %}
+    <img src='/images/{{i.image_name}}'>
     <div>Дата написания - {{i.date}}</div>
     {% if current_user.is_authenticated and current_user == i.user %}
     <div>
