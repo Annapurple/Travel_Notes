@@ -152,9 +152,9 @@ def edit_note(id):
 @app.route('/images/<filename>')
 def get_image(filename):
     db_sess = db_session.create_session()
-    dish = db_sess.query(Notes).filter(Notes.image_name == filename).first()
+    note = db_sess.query(Notes).filter(Notes.image_name == filename).first()
     return send_file(
-        io.BytesIO(dish.image),
+        io.BytesIO(note.image),
         mimetype='image/jpeg',
         as_attachment=True,
         download_name=filename)
