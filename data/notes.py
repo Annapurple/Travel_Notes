@@ -15,6 +15,7 @@ class Notes(SqlAlchemyBase, SerializerMixin):
     image = sqlalchemy.Column(sqlalchemy.BLOB, nullable=True)
     image_name = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     title = sqlalchemy.Column(sqlalchemy.String, nullable=True)
+    color = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     location = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     information = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     date = sqlalchemy.Column(sqlalchemy.DateTime, nullable=True)

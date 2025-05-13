@@ -10,5 +10,6 @@ class NotesForm(FlaskForm):
     location = StringField('Локация', validators=[DataRequired()])
     information = StringField('Описание', validators=[DataRequired()])
     image = FileField('Фотография', validators=[DataRequired()])
+    color = StringField('Цвет в RGB(Подсказка внизу)', validators=[DataRequired()])
     is_anon = BooleanField("Анонимно?")
     submit = SubmitField('Submit')

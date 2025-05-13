@@ -1,47 +1,56 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>Notes</h1>
-{% if current_user.is_authenticated%}
-    <div>
-        <a href="/note" class="btn btn-primary">
-            Добавить заметку
-        </a>
-    </div>
-{% endif %}
-{% for i in notes%}
-<div class="col-md6 border rounded">
-    <h2>{{i.title}}</h2>
-    <div>
-        {{i.location}}
-    </div>
-    <div>
-        {{i.information}}
-    </div>
-    {% if i.is_anon == False %}
-    <div>
-        Автор - {{i.user.name}}
-    </div>
-    {% elif i.is_anon == True %}
-    <div>Автор неизвестен</div>
+<div class="mb-4">
+    <h1>Notes</h1>
+    {% if current_user.is_authenticated %}
+        <div class="mb-3">
+            <a href="/note" class="btn btn-primary">
+                Добавить заметку
+            </a>
+        </div>
     {% endif %}
-    <img src='/images/{{i.image_name}}'>
-    <div>Дата написания - {{i.date}}</div>
-    {% if current_user.is_authenticated and current_user == i.user %}
-    <div>
-        <a href="/notes/{{ i.id }}" class="btn btn-warning">
-            Изменить
-        </a>
-        <a href="/notes_delete/{{ i.id }}" class="btn btn-danger">
-            Удалить
-        </a>
-        {% if not i.bit_picture %}
-        <a href="/load_photo/{{ i.id }}" class="btn btn-warning">
-            Добавить фото
-        </a>
+</div>
+{% for i in notes %}
+<div class="row mb-3 border rounded">
+    <div class="col-md-6 d-flex flex-column">
+       <h2 style="font-size: 2em; line-height: 1.5; color: {{ i.color }};">{{ i.title }}</h2>
+        <div style="font-size: 1.2em; line-height: 1.5; color: {{ i.color }}">
+            {{ i.location }}
+        </div>
+        <div style="font-size: 1.2em; line-height: 1.5; color: {{ i.color }}">
+            {{ i.information }}
+        </div>
+        {% if i.is_anon == False %}
+            <div style="font-size: 1.2em; line-height: 1.5; color: {{ i.color }}">
+                Автор - {{ i.user.name }}
+            </div>
+        {% elif i.is_anon == True %}
+            <div style="font-size: 1.2em; line-height: 1.5; color: {{ i.color }}">Автор неизвестен</div>
+        {% endif %}
+        <div style="font-size: 1.2em; line-height: 1.5; color: {{ i.color }}">Дата написания - {{ i.date }}</div>
+        <div class="mt-auto">
+            {% if current_user.is_authenticated and current_user == i.user %}
+                <a href="/notes/{{ i.id }}" class="btn btn-warning">
+                    Изменить
+                </a>
+                <a href="/notes_delete/{{ i.id }}" class="btn btn-danger">
+                    Удалить
+                </a>
+            {% endif %}
+        </div>
+    </div>
+    <div class="col-md-6 p-0">
+        {% if i.image_name.endswith('.mp4') or i.image_name.endswith('.avi') or i.image_name.endswith('.mov') or i.image_name.endswith('.wmv') %}
+            <video controls class="img-fluid h-100 w-100">
+                <source src='/images/{{ i.image_name }}' type='video/mp4'>
+            </video>
+        {% elif i.image_name.endswith('.jpg') or i.image_name.endswith('.png') or i.image_name.endswith('.gif') %}
+            <img src='/images/{{ i.image_name }}' class="img-fluid h-100 w-100">
+        {% else %}
+            <script> window.location.href = '/trigger-500-error';</script>
         {% endif %}
     </div>
 </div>
-{% endif %}
 {% endfor %}
 {% endblock %}

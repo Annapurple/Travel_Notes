@@ -1,20 +1,32 @@
 {% extends "base.html" %}
 {% block content %}
-<h1>Мои записи</h1>
+<div style="display: flex; justify-content: space-between; align-items: center;">
+    <h1>My Notes ({{ notes|length }})</h1>
+    <a class="navbar-brand" href="/logout" style="color: red;">Выйти</a>
+</div>
 {% for i in notes%}
-{% if current_user.is_authenticated and current_user == i.user %}
-<div class="col-md6 border rounded">
-    <h2>{{i.title}}</h2>
-    <div>
-        {{i.location}}
+<div class="row mb-3 border rounded">
+    <div class="col-md-6 d-flex flex-column">
+        <h2 style="font-size: 2em; line-height: 1.5; color: {{ i.color }}">{{ i.title }}</h2>
+        <div style="font-size: 1.2em; line-height: 1.5; color: {{ i.color }}">
+            {{ i.location }}
+        </div>
+        <div style="font-size: 1.2em; line-height: 1.5; color: {{ i.color }}">
+            {{ i.information }}
+        </div>
+        {% if i.is_anon == False %}
+            <div style="font-size: 1.2em; line-height: 1.5; color: {{ i.color }}">
+                Автор - {{ i.user.name }}
+            </div>
+        {% elif i.is_anon == True %}
+            <div style="font-size: 1.2em; line-height: 1.5; color: {{ i.color }}">Автор неизвестен</div>
+        {% endif %}
+        <div style="font-size: 1.2em; line-height: 1.5; color: {{ i.color }}">Дата написания - {{ i.date }}</div>
     </div>
-    <div>
-        {{i.information}}
-    </div>
-    <div>
-        Автор - {{i.user.name}}, Дата написания - {{i.date}}
+    <div class="col-md-6 p-0">
+        <img src='/images/{{ i.image_name }}' class="img-fluid h-100 w-100">
     </div>
 </div>
-{% endif %}
+</div>
 {% endfor %}
 {% endblock %}

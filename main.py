@@ -35,7 +35,7 @@ def text():
 @login_required
 def user_page():
     db_sess = db_session.create_session()
-    note = db_sess.query(Notes).filter(Notes.user)
+    note = db_sess.query(Notes).filter_by(user=current_user).all()
     return render_template("user_page.html", notes=note, title='Notes')
 
 
@@ -96,17 +96,27 @@ def add_note():
                 toponym = json_response["response"]["GeoObjectCollection"]["featureMember"][0]["GeoObject"]
                 toponym_address = toponym["metaDataProperty"]["GeocoderMetaData"]["text"]
                 toponym_coodrinates = toponym["Point"]["pos"]
-                location = f'{place} имеет координаты:{toponym_coodrinates}'
+                if int(toponym_coodrinates[0]) > 0 and int(toponym_coodrinates[1]) > 0:
+                    location = f'{place} (координаты:{toponym_coodrinates})'
+                else:
+                    location = place
             except:
                 location = place
         else:
             location = place
+        color = form.color.data.strip()
+        if not (color.startswith('#') and len(color) in [4, 7] and all(
+                c in '0123456789abcdefABCDEF' for c in color[1:])):
+            color = '#000000'
+        else:
+            color = form.color.data.strip()
         note = Notes(
             title=form.title.data,
             location=location,
             information=form.information.data,
             image=form.image.data.read(),
             image_name=form.image.data.filename,
+            color=color,
             date=datetime.now(),
             is_anon=form.is_anon.data)
         if note:
@@ -114,7 +124,7 @@ def add_note():
             db_sess.merge(note)
             db_sess.commit()
         return redirect('/')
-    return render_template('notes_form.html', title='Добавление заметки', form=form)
+    return render_template('notes_form.html', title='Note adding', form=form)
 
 
 @app.route('/notes/<int:id>', methods=['GET', 'POST'])
@@ -130,6 +140,7 @@ def edit_note(id):
             form.title.data = notes.title
             form.location.data = notes.location
             form.information.data = notes.information
+            form.color.data = notes.color
         else:
             abort(404)
     if form.validate_on_submit():
@@ -144,25 +155,62 @@ def edit_note(id):
             notes.image = form.image.data.read()
             notes.image_name = form.image.data.filename
             notes.is_anon = form.is_anon.data
+            notes.color = form.color.data
             db_sess.commit()
             return redirect('/')
         else:
             abort(404)
     return render_template('notes_form.html',
-                           title='Редактирование новости',
-                           form=form
-                           )
+                           title='Note editing',
+                           form=form)
 
 
-@app.route('/images/<filename>')
+def get_content_type(extension):
+    if extension == 'png':
+        return 'image/png'
+    elif extension in ['jpg', 'jpeg']:
+        return 'image/jpeg'
+    elif extension == 'gif':
+        return 'image/gif'
+    elif extension == 'mp4':
+        return 'video/mp4'
+    elif extension == 'avi':
+        return 'video/x-msvideo'
+    elif extension == 'mov':
+        return 'video/quicktime'
+    elif extension == 'wmv':
+        return 'video/x-ms-wmv'
+    return 'application/octet-stream'
+
+
+@app.route('/upload', methods=['POST'])
+def upload_image():
+    if 'file' not in request.files:
+        return abort(400, "No file part")
+    file = request.files['file']
+    if file.filename == '':
+        return abort(400, "No selected file")
+    file_content = file.read()
+    db_sess = db_session.create_session()
+    new_note = Notes(image_name=file.filename, image=file_content)
+    db_sess.add(new_note)
+    db_sess.commit()
+
+
+@app.route('/images/<filename>', methods=['GET'])
 def get_image(filename):
     db_sess = db_session.create_session()
     note = db_sess.query(Notes).filter(Notes.image_name == filename).first()
+    if note is None:
+        abort(404)
+    extension = filename.rsplit('.', 1)[1].lower()
+    content_type = get_content_type(extension)
     return send_file(
         io.BytesIO(note.image),
-        mimetype='image/jpeg',
+        mimetype=content_type,
         as_attachment=True,
-        download_name=filename)
+        download_name=filename
+    )
 
 
 @app.route('/notes_delete/<int:id>', methods=['GET', 'POST'])
@@ -185,6 +233,26 @@ def note_delete(id):
 def logout():
     logout_user()
     return redirect("/")
+
+
+@app.errorhandler(401)
+def unauthorized(e):
+    return render_template('401.html'), 401
+
+
+@app.errorhandler(403)
+def unauthorized(e):
+    return render_template('403.html'), 403
+
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'), 404
+
+
+@app.errorhandler(500)
+def internal_server_error(e):
+    return render_template('500.html'), 500
 
 
 if __name__ == '__main__':

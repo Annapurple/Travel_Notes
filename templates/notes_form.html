@@ -41,6 +41,16 @@
             </p>
         {% endfor %}
     </p>
+        <p>
+        {{ form.color.label }}<br>
+        {{ form.color(class="form-control") }}<br>
+        {% for error in form.color.errors %}
+            <p class="alert alert-danger" role="alert">
+                {{ error }}
+            </p>
+        {% endfor %}
+    </p>
+    <img src="{{ url_for('static', filename='./images/colors.jpg') }}" style="max-width: 200px; margin-bottom: 20px">
     <p>{{ form.submit(type="submit") }}</p>
     {{message}}
 </form>
