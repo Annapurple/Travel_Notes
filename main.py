@@ -42,6 +42,8 @@ def user_page():
 @app.route('/register', methods=['GET', 'POST'])
 def reqister():
     form = RegisterForm()
+    if current_user.is_authenticated:
+        return redirect('/')
     if form.validate_on_submit():
         if form.password.data != form.password_again.data:
             return render_template('register.html', title='Register form',
@@ -67,6 +69,8 @@ def reqister():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     form = LoginForm()
+    if current_user.is_authenticated:
+        return redirect('/')
     if form.validate_on_submit():
         db_sess = db_session.create_session()
         user = db_sess.query(User).filter(User.email == form.email.data).first()
@@ -85,25 +89,25 @@ def add_note():
     form = NotesForm()
     if form.validate_on_submit():
         db_sess = db_session.create_session()
-        server_address = 'http://geocode-maps.yandex.ru/1.x/?'
-        api_key = '8013b162-6b42-4997-9691-77b7074026e0'
-        place = form.location.data
-        geocoder_request = f'{server_address}apikey={api_key}&geocode={place}&format=json'
-        response = requests.get(geocoder_request)
-        if response:
-            try:
-                json_response = response.json()
-                toponym = json_response["response"]["GeoObjectCollection"]["featureMember"][0]["GeoObject"]
-                toponym_address = toponym["metaDataProperty"]["GeocoderMetaData"]["text"]
-                toponym_coodrinates = toponym["Point"]["pos"]
-                if int(toponym_coodrinates[0]) > 0 and int(toponym_coodrinates[1]) > 0:
-                    location = f'{place} (координаты:{toponym_coodrinates})'
-                else:
-                    location = place
-            except:
-                location = place
-        else:
-            location = place
+        # server_address = 'http://geocode-maps.yandex.ru/1.x/?'
+        # api_key = '8013b162-6b42-4997-9691-77b7074026e0'
+        # place = form.location.data
+        # geocoder_request = f'{server_address}apikey={api_key}&geocode={place}&format=json'
+        # response = requests.get(geocoder_request)
+        # if response:
+        #     try:
+        #         json_response = response.json()
+        #         toponym = json_response["response"]["GeoObjectCollection"]["featureMember"][0]["GeoObject"]
+        #         toponym_address = toponym["metaDataProperty"]["GeocoderMetaData"]["text"]
+        #         toponym_coodrinates = toponym["Point"]["pos"]
+        #         if int(toponym_coodrinates[0]) > 0 and int(toponym_coodrinates[1]) > 0:
+        #             location = f'{place} (координаты:{toponym_coodrinates})'
+        #         else:
+        #             location = place
+        #     except:
+        #         location = place
+        # else:
+        #     location = place
         color = form.color.data.strip()
         if not (color.startswith('#') and len(color) in [4, 7] and all(
                 c in '0123456789abcdefABCDEF' for c in color[1:])):
@@ -112,7 +116,7 @@ def add_note():
             color = form.color.data.strip()
         note = Notes(
             title=form.title.data,
-            location=location,
+            location=form.location.data,
             information=form.information.data,
             image=form.image.data.read(),
             image_name=form.image.data.filename,
@@ -134,7 +138,7 @@ def edit_note(id):
     if request.method == "GET":
         db_sess = db_session.create_session()
         notes = db_sess.query(Notes).filter(Notes.id == id,
-                                            Notes.user == current_user
+                                            Notes.user_id == current_user.id
                                             ).first()
         if notes:
             form.title.data = notes.title
@@ -143,10 +147,13 @@ def edit_note(id):
             form.color.data = notes.color
         else:
             abort(404)
-    if form.validate_on_submit():
+        return render_template('notes_form.html',
+                               title='Note editing',
+                               form=form)
+    elif form.validate_on_submit():
         db_sess = db_session.create_session()
         notes = db_sess.query(Notes).filter(Notes.id == id,
-                                            Notes.user == current_user
+                                            Notes.user_id == current_user.id
                                             ).first()
         if notes:
             notes.title = form.title.data
@@ -160,9 +167,6 @@ def edit_note(id):
             return redirect('/')
         else:
             abort(404)
-    return render_template('notes_form.html',
-                           title='Note editing',
-                           form=form)
 
 
 def get_content_type(extension):
@@ -218,7 +222,7 @@ def get_image(filename):
 def note_delete(id):
     db_sess = db_session.create_session()
     notes = db_sess.query(Notes).filter(Notes.id == id,
-                                        Notes.user == current_user
+                                        Notes.user_id == current_user.id
                                         ).first()
     if notes:
         db_sess.delete(notes)
